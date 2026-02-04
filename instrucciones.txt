@@ -1,0 +1,57 @@
+===========================================================
+PROYECTO: LARAVEL 12 + REACT (PUNTO DE CONTROL 2)
+===========================================================
+
+Este documento detalla los pasos para instalar el proyecto en una nueva laptop.
+
+1. REQUISITOS PREVIOS (Instalar antes de empezar):
+--------------------------------------------------
+- PHP 8.2 o superior.
+- Composer (https://getcomposer.org/)
+- Node.js (v18+) y NPM.
+- Servidor de Base de Datos (XAMPP, Laragon o MySQL).
+
+2. INSTALACIÓN PASO A PASO:
+---------------------------
+Paso 1: Copiar la carpeta del proyecto a la laptop.
+Paso 2: Verificar que el archivo ".env" esté en la raíz. Si no existe,
+        copiar ".env.example", renombrarlo a ".env" y configurar
+        los datos de DB_DATABASE, DB_USERNAME y DB_PASSWORD.
+
+Paso 3: Abrir una terminal en la carpeta del proyecto y ejecutar:
+        > composer install
+        (Esto descargará todas las librerías de PHP/Laravel).
+
+Paso 4: En la misma terminal, ejecutar:
+        > npm install
+        (Esto descargará todas las librerías de React/Vite).
+
+Paso 5: Generar la clave de seguridad de la aplicación:
+        > php artisan key:generate
+
+Paso 6: Crear la base de datos en MySQL con el nombre definido en el .env.
+        Luego, crear las tablas ejecutando:
+        > php artisan migrate
+
+3. NOTA SOBRE EL USUARIO ADMINISTRADOR:
+---------------------------------------
+Si la base de datos es nueva, el usuario que registres no será ADMIN
+por defecto. Debes entrar a la tabla `admin_sistemas` y añadir manualmente
+el ID de tu usuario para que aparezca el "Panel de Control" en la Sidebar.
+
+4. CÓMO EJECUTAR EL PROYECTO:
+----------------------------
+Debes tener DOS terminales abiertas simultáneamente:
+
+Terminal 1 (Servidor Backend):
+> php artisan serve
+
+Terminal 2 (Compilador Frontend):
+> npm run dev
+
+5. ACCESO:
+----------
+URL: http://127.0.0.1:8000
+Admin Panel: http://127.0.0.1:8000/system/admin (Solo Staff)
+
+===========================================================
