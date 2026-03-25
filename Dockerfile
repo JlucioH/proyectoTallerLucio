@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     && docker-php-ext-install pdo pdo_pgsql intl bcmath
 
-# 2. Instalar Node.js (Usando una versión estable para Vite/React)
+# 2. Instalar Node.js (Versión estable para Vite/React)
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs
 
@@ -33,12 +33,17 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
 RUN a2enmod rewrite
 
-# 8. TRUCO PARA RENDER: Cambiar el puerto 80 de Apache por el $PORT dinámico
-RUN sed -i 's/Listen 80/Listen ${PORT}/g' /etc/apache2/ports.conf
-RUN sed -i 's/<VirtualHost \*:80>/<VirtualHost *:${PORT}>/g' /etc/apache2/sites-available/000-default.conf
+# 8. CONFIGURACIÓN DE PUERTO PARA RENDER
+# Usamos comillas dobles y escapamos el símbolo $ para que Apache lea el puerto dinámico correctamente
+RUN sed -i "s/Listen 80/Listen \${PORT}/g" /etc/apache2/ports.conf
+RUN sed -i "s/<VirtualHost \*:80>/<VirtualHost *:\${PORT}>/g" /etc/apache2/sites-available/000-default.conf
 
+# 9. Eliminar el aviso de "Could not reliably determine the server's fully qualified domain name"
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
 
-# 9. Comando de inicio: Migraciones y encender Apache
-# Usamos "exec" para que Apache reciba las señales de apagado correctamente
-#CMD php artisan migrate --force && apache2-foreground
-CMD php artisan config:clear && php artisan migrate --force && apache2-foreground
+# 10. Comando de inicio: Limpieza de caché, migraciones y encender Apache
+# Añadimos config:clear y cache:clear para que reconozca los cambios de Brevo en Render
+CMD php artisan config:clear && \
+    php artisan cache:clear && \
+    php artisan migrate --force && \
+    apache2-foreground
