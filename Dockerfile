@@ -1,28 +1,42 @@
 FROM php:8.4-apache
 
-# Instalar dependencias del sistema
+# 1. Instalar dependencias del sistema y extensiones necesarias
 RUN apt-get update && apt-get install -y \
     libpq-dev \
-    nodejs \
-    npm \
-    unzip
+    libicu-dev \
+    zip \
+    unzip \
+    git \
+    curl \
+    && docker-php-ext-install pdo pdo_pgsql intl bcmath
 
-# Instalar extensiones de PHP para PostgreSQL
-RUN docker-php-ext-install pdo pdo_pgsql
+# 2. Instalar Node.js (Usando una versión estable para Vite/React)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs
 
-# Instalar Composer
+# 3. Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
+# 4. Configurar el directorio de trabajo
 WORKDIR /var/www/html
 COPY . .
 
-# Instalar dependencias de Laravel y React
-RUN composer install --no-dev
+# 5. Instalar dependencias de PHP y generar assets de React
+RUN composer install --no-dev --optimize-autoloader
 RUN npm install && npm run build
 
-# Configurar Apache
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+# 6. Configurar permisos para Laravel
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache \
+    && chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+
+# 7. Configurar Apache para que apunte a la carpeta /public
 RUN sed -i 's|/var/www/html|/var/www/html/public|g' /etc/apache2/sites-available/000-default.conf
 RUN a2enmod rewrite
 
+# 8. TRUCO PARA RENDER: Cambiar el puerto 80 de Apache por el $PORT dinámico
+RUN sed -i 's/Listen 80/Listen ${PORT}/g' /etc/apache2/ports.conf
+RUN sed -i 's/<VirtualHost \*:80>/<VirtualHost *:${PORT}>/g' /etc/apache2/sites-available/000-default.conf
+
+# 9. Comando de inicio: Migraciones y encender Apache
+# Usamos "exec" para que Apache reciba las señales de apagado correctamente
 CMD php artisan migrate --force && apache2-foreground
