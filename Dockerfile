@@ -39,4 +39,5 @@ RUN sed -i 's/<VirtualHost \*:80>/<VirtualHost *:${PORT}>/g' /etc/apache2/sites-
 
 # 9. Comando de inicio: Migraciones y encender Apache
 # Usamos "exec" para que Apache reciba las señales de apagado correctamente
-CMD php artisan migrate --force && apache2-foreground
+#CMD php artisan migrate --force && apache2-foreground
+CMD php artisan config:clear && php artisan migrate --force && apache2-foreground
