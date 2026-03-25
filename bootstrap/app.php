@@ -15,7 +15,8 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        
+        //rebote de render
+        $middleware->trustProxies(at: '*');
         // 1. Configuración de Cookies (Correcto)
         $middleware->encryptCookies(except: [
             'appearance', 

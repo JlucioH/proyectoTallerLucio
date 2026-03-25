@@ -6,7 +6,7 @@ interface EmpresaConRol {
     nombreEmpresa: string;
     rol: string; 
 }
-
+ 
 export default function SeleccionarEmpresa({ empresas }: { empresas: EmpresaConRol[] }) {
     
     const seleccionar = (idEmpresa: number) => {
