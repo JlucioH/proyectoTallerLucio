@@ -37,6 +37,7 @@ RUN a2enmod rewrite
 RUN sed -i 's/Listen 80/Listen ${PORT}/g' /etc/apache2/ports.conf
 RUN sed -i 's/<VirtualHost \*:80>/<VirtualHost *:${PORT}>/g' /etc/apache2/sites-available/000-default.conf
 
+
 # 9. Comando de inicio: Migraciones y encender Apache
 # Usamos "exec" para que Apache reciba las señales de apagado correctamente
 #CMD php artisan migrate --force && apache2-foreground
